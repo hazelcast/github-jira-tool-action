@@ -54,7 +54,7 @@ runs:
         title: ${{ github.event.issue.title }}
       with:
         script: |
-          const newTitle = process.env.title + ' ' + [${{ steps.create_jira_issue.outputs.issue }}]
+          const newTitle = process.env.title + ' [${{ steps.create_jira_issue.outputs.issue }}]
           github.issues.update({
             issue_number: context.issue.number,
             owner: context.repo.owner,
