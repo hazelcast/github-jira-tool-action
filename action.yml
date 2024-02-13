@@ -42,7 +42,7 @@ runs:
         result-encoding: string
         script: |
           const teamName = "${{ inputs.TEAM_NAME }}"
-          const teamMapping = JSON.parse("${{ env.TEAM_NAME_TO_ID_MAPPING }}")
+          const teamMapping = JSON.parse('${{ env.TEAM_NAME_TO_ID_MAPPING }}')
           let teamId = ""
           if (teamName) {
           teamId = teamMapping[teamName.upperCase()]
