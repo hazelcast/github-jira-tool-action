@@ -43,9 +43,12 @@ runs:
         script: |
           const teamName = "${{ inputs.TEAM_NAME }}"
           const teamMapping = JSON.parse('${{ env.TEAM_NAME_TO_ID_MAPPING }}')
-          let teamId = ""
+          let teamId;
           if (teamName) {
           teamId = teamMapping[teamName.toUpperCase()]
+          }
+          if(!teamId) {
+          return null
           }
           return teamId
     - name: Create Jira issue
