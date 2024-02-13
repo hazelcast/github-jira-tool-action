@@ -19,6 +19,9 @@ inputs:
   ISSUE_TYPE:
     description: 'Specify the issue type: Task/Bug/Story'
     required: true
+  TEAM_NAME:
+    description: 'Specify the Team (use exact name from the jira) to set this in the issue'
+    required: false
 
 runs:
   using: "composite"
@@ -30,8 +33,20 @@ runs:
         JIRA_BASE_URL: ${{ inputs.JIRA_BASE_URL }}
         JIRA_USER_EMAIL: ${{ inputs.JIRA_USER_EMAIL }}
         JIRA_API_TOKEN: ${{ inputs.JIRA_API_TOKEN }}
-        
-
+        TEAM_NAME_TO_ID_MAPPING: '{"CORE":"8efa38f2-5771-4c85-9937-81480a9a73a7", "STORAGE":"f872bbfc-2e8c-4d08-ae32-eaec7868a02d", "SQL":"4f4bd152-d7fe-45dc-a85a-1ffd46859718", "DATA INTEGRATION":"67b972af-e215-4a30-9c6e-e2010d97278e", "ALTO":"b9396a1a-7f55-4b08-96ab-bcf5c5320dbe", "DOCUMENTATION":"e1c90cba-1d48-4cd4-8ba8-970fcddc1961", "PRODUCT MANAGEMENT":"dd085095-e1d2-485b-bdf7-b4c991d34208", "QE":"067f44d8-48bf-4376-b505-076c85912994", "MANAGEMENT AND MONITORING":"c0d3f295-0b47-47aa-9bfb-eb5b1e8c4189", "DESIGN":"19ce6cbf-6127-4998-a3f9-f6a196ae8846", "DMT":"948cd0f9-4738-46ca-9c9b-19c1e79283cd", "PRODUCT MARKETING":"6bd56cd7-9380-457a-a9a2-132d8474f2d3", "RELEASE ENGINEERING":"bf6b1c42-7ea8-4c2e-8454-3468c862217f", "SECURITY":"b220c813-a4b4-4a4f-9f8e-4b7a90c6445d", "SRE":"00a4a840-a5ec-4f14-8c2a-38dbe195b6d0", "TEMPORARY CORE SOLUTIONS":"b09f05e1-ec76-46fa-a1d5-a11aff14f1a7", "TPM":"65396743-4b83-435c-b8d9-634cd7438a08", "VIRIDIAN":"4106b2b9-b650-460a-9b3b-82423b9ab7ac"}'
+    - name: Map TEAM_NAME input to Jira Team id
+        id: map_team_name_to_id
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const teamName = "${{ env.TEAM_NAME }}"
+            const teamMapping = JSON.parse("${{ env.TEAM_NAME_TO_ID_MAPPING }}")
+            let teamId = ""
+            if (teamName) {
+            teamId = teamMapping[teamName.upperCase()]
+            }
+            return teamId
     - name: Create Jira issue
       id: create_jira_issue
       uses: atlassian/gajira-create@v2.0.1
@@ -45,14 +60,15 @@ runs:
           *Created By:* ${{ github.event.issue.user.login }}
           [Github permalink|${{ github.event.issue.html_url }}]
           {panel}
-        fields: '{"labels": ["${{ inputs.JIRA_LABEL }}"]}'
-
+        fields: '{"labels": ["${{ inputs.JIRA_LABEL }}"], "customfield_10001" : "${{ steps.map_team_name_to_id.outputs.result }}" }'
 
     - name: Update title of GitHub issue
       uses: actions/github-script@v4.0.2
+      env:
+        title: ${{ github.event.issue.title }}
       with:
         script: |
-          const newTitle = `${{ github.event.issue.title }} [${{ steps.create_jira_issue.outputs.issue }}]`
+          const newTitle = process.env.title + ` [${{ steps.create_jira_issue.outputs.issue }}]`
           github.issues.update({
             issue_number: context.issue.number,
             owner: context.repo.owner,
