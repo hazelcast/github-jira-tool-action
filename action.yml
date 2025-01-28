@@ -22,6 +22,9 @@ inputs:
   TEAM_NAME:
     description: 'Specify the Team (use exact name from the jira) to set this in the issue'
     required: false
+  CUSTOM_FIELDS:
+    description: 'JSON key-value strings of custom fields to be added to the JIRA issue'
+    required: false
 
 runs:
   using: "composite"
@@ -64,7 +67,7 @@ runs:
           *Created By:* ${{ github.event.issue.user.login }}
           [Github permalink|${{ github.event.issue.html_url }}]
           {panel}
-        fields: '{"labels": ["${{ inputs.JIRA_LABEL }}"] ${{ steps.map_team_name_to_id.outputs.result }} }'
+        fields: '{"labels": ["${{ inputs.JIRA_LABEL }}"] ${{ steps.map_team_name_to_id.outputs.result }} ${{ inputs.CUSTOM_FIELDS ? ',' + inputs.CUSTOM_FIELDS : '' }} }'
 
     - name: Update title of GitHub issue
       uses: actions/github-script@v4.0.2
