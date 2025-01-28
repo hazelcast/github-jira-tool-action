@@ -73,7 +73,6 @@ runs:
             ${{ steps.map_team_name_to_id.outputs.result }}
             ${{ inputs.CUSTOM_FIELDS ? ',' + inputs.CUSTOM_FIELDS : '' }}
           }
-
     - name: Update title of GitHub issue
       uses: actions/github-script@v4.0.2
       env:
