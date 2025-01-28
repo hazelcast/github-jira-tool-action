@@ -54,6 +54,18 @@ runs:
           return ""
           }
           return ',"customfield_10001" : "' + teamId + '"'
+
+    - name: Fetch CUSTOM_FIELDS if defined
+      id: fetch_custom_fields_if_defined
+      uses: actions/github-script@v6
+      with:
+        result-encoding: string
+        script: |
+          const customFields = "${{ inputs.CUSTOM_FIELDS }}"
+          if (customFields) {
+          return ',' + customFields
+          }
+          return ""
     - name: Create Jira issue
       id: create_jira_issue
       uses: atlassian/gajira-create@v2.0.1
@@ -67,12 +79,7 @@ runs:
           *Created By:* ${{ github.event.issue.user.login }}
           [Github permalink|${{ github.event.issue.html_url }}]
           {panel}
-        fields: |
-          {
-            "labels": ["${{ inputs.JIRA_LABEL }}"]
-            ${{ steps.map_team_name_to_id.outputs.result }}
-            ${{ inputs.CUSTOM_FIELDS ? ',' + inputs.CUSTOM_FIELDS : '' }}
-          }
+        fields: '{"labels": ["${{ inputs.JIRA_LABEL }}"] ${{ steps.map_team_name_to_id.outputs.result }} ${{ steps.fetch_custom_fields_if_defined.outputs.result }} }'
     - name: Update title of GitHub issue
       uses: actions/github-script@v4.0.2
       env:
