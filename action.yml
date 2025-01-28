@@ -67,7 +67,7 @@ runs:
               const parsedCustomFields = JSON.parse(inputToParse);
               console.log(`Parsed CUSTOM_FIELDS: ${JSON.stringify(parsedCustomFields)}`);
               return ',' + Object.entries(parsedCustomFields)
-                .map(([key, value]) => `"${key}": "${value}"`)
+                .map(([key, value]) => `"${key}": ${JSON.stringify(value)}`)
                 .join(', ');
             } catch (error) {
               throw new Error(
