@@ -68,9 +68,11 @@ runs:
           [Github permalink|${{ github.event.issue.html_url }}]
           {panel}
         fields: |
+          {
             "labels": ["${{ inputs.JIRA_LABEL }}"]
             ${{ steps.map_team_name_to_id.outputs.result }}
             ${{ inputs.CUSTOM_FIELDS ? ',' + inputs.CUSTOM_FIELDS : '' }}
+          }
 
     - name: Update title of GitHub issue
       uses: actions/github-script@v4.0.2
